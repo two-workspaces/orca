@@ -54,8 +54,8 @@ Links stay valid until you revoke them, and paired devices stay paired across re
 
 Notes and limits:
 
-- **RAM:** about 250 MB idle on Railway (Orca's runtime with its headless Chromium, the terminal daemon, the pairing page and nginx). One OpenCode session took it to about 1 GB, and builds and tests need more. Use the Hobby plan or higher; the Trial plan's 512 MB will not run an agent.
-- The image is about 4 GB, so the first build takes a few minutes.
+- **RAM:** about 500 MB idle on Railway (Orca's runtime with its headless Chromium, the terminal daemon, the pairing page and nginx; measured 2026-11-09). One OpenCode session took it to about 1 GB, and builds and tests need more. Use the Hobby plan: the Trial plan's 1 GB starts Orca but not much of an agent, and on the Free plan's 0.5 GB the template shows a page saying so instead of starting Orca.
+- The image is about 4 GB, so the first deploy takes a few minutes to pull it.
 - **Orca's remote server mode is beta upstream.** Expect rough edges between versions.
 - **This server runs arbitrary commands.** Agents and Orca terminals have a shell with passwordless sudo on this box. Orca's device pairing and `ORCA_SETUP_PASSWORD` are all that protect it: keep the password secret and treat pairing links like passwords.
 - Anything installed outside `/home/orca` is lost on redeploy. Put tools in `~/.local/bin`.

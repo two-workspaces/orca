@@ -2,6 +2,32 @@
 set -e
 : "${ORCA_SETUP_PASSWORD:?ORCA_SETUP_PASSWORD is required - it gates the pairing page}"
 
+# Orca idles at ~500 MB on Railway, so on the Free plan (0.5 GB) it's OOM-killed
+# before anyone pairs, and Railway counts each kill as a failed deploy. On a
+# service under ~1 GB serve a page saying what's needed instead of starting Orca.
+mem=$(cat /sys/fs/cgroup/memory.max 2>/dev/null || cat /sys/fs/cgroup/memory/memory.limit_in_bytes 2>/dev/null || echo max)
+if [ "$mem" != max ] && [ "$mem" -lt $((900 * 1024 * 1024)) ] 2>/dev/null; then
+  mkdir -p /run/gate
+  cat > /run/gate/index.html <<HTML
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orca needs more memory</title><style>body{font:16px/1.5 system-ui,sans-serif;max-width:40rem;margin:3rem auto;padding:0 1rem}</style></head>
+<body><h1>Orca needs at least 1 GB of memory</h1>
+<p>This service is limited to $((mem / 1024 / 1024)) MB, which is Railway's Free plan. Orca alone uses about 500 MB idle, so it hasn't been started.</p>
+<p>The Trial plan (1 GB) starts it, and Hobby gives the agents room to work. Upgrade, then redeploy this service.</p></body></html>
+HTML
+  cat > /etc/nginx/conf.d/orca.conf <<CFG
+server {
+  listen ${PORT} default_server;
+  listen [::]:${PORT} default_server;
+  root /run/gate;
+  location = /healthcheck { return 200 "ok"; }
+  location / { try_files /index.html =404; }
+}
+CFG
+  echo "== memory limit $((mem / 1024 / 1024)) MB is under the 1 GB Orca needs; serving instructions on :${PORT} instead"
+  exec nginx -g 'daemon off;'
+fi
+
 # /home/orca is the Railway volume: empty (bar lost+found) and root-owned on first boot.
 H=/home/orca
 S=$H/.config/orca-railway   # pairing offers for the /railway-pair page (credentials: 0700)

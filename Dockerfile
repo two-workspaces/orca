@@ -36,11 +36,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR=/usr/local/bin sh \
   && npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" "@openai/codex@${CODEX_VERSION}" \
   && npm cache clean --force && claude --version && codex --version \
-  && curl -fsSL -o /tmp/oc.tgz "https://github.com/anomalyco/opencode/releases/download/v${OPENCODE_VERSION}/opencode-linux-x64.tar.gz" \
+  && curl -fsSL --retry 20 --retry-delay 15 --retry-all-errors -o /tmp/oc.tgz "https://github.com/anomalyco/opencode/releases/download/v${OPENCODE_VERSION}/opencode-linux-x64.tar.gz" \
   && echo "${OPENCODE_SHA256}  /tmp/oc.tgz" | sha256sum -c - \
   && tar xzf /tmp/oc.tgz -C /usr/local/bin opencode && rm /tmp/oc.tgz && opencode --version \
   # Orca ships desktop packages only: extract the AppImage (no FUSE in containers).
-  && curl -fsSL -o /tmp/orca.AppImage "https://github.com/stablyai/orca/releases/download/v${ORCA_VERSION}/orca-linux.AppImage" \
+  && curl -fsSL --retry 20 --retry-delay 15 --retry-all-errors -o /tmp/orca.AppImage "https://github.com/stablyai/orca/releases/download/v${ORCA_VERSION}/orca-linux.AppImage" \
   && echo "${ORCA_SHA256}  /tmp/orca.AppImage" | sha256sum -c - \
   && cd /tmp && chmod +x orca.AppImage && ./orca.AppImage --appimage-extract >/dev/null \
   && mv squashfs-root /opt/orca && chmod -R a+rX /opt/orca && rm orca.AppImage && cd / \
