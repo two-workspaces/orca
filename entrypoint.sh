@@ -80,6 +80,11 @@ unset ORCA_SETUP_PASSWORD
 ADDR="${ORCA_PAIRING_ADDRESS:-https://${RAILWAY_PUBLIC_DOMAIN:-localhost}}"
 echo "== Orca ${ORCA_VERSION} on :${PORT}. Pair a device at ${ADDR}/railway-pair"
 cd "$H/projects"
+# Orca's data-root lock names the container that wrote it. After a redeploy that container
+# is gone, and Orca 1.4.254+ refuses to start on a lock "from another machine" (it can't
+# check a remote pid). A Railway volume attaches to one container, so the lock is stale here.
+# Once per boot only: on a restart inside this container Orca checks the pid itself.
+rm -f "$H/.config/orca/orcad.lock"
 # Orca prints its pairing offer (a credential) as one JSON line at startup: keep it out of
 # the logs and hand it to the pairing page. The page restarts Orca through this loop.
 while :; do

@@ -50,12 +50,14 @@ createServer(async (req, res) => {
     res.writeHead(401, { "WWW-Authenticate": 'Basic realm="Orca pairing", charset="UTF-8"' });
     return res.end("Password required: ORCA_SETUP_PASSWORD from the service's Variables tab.\n");
   }
-  const headers = { "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" };
+  const headers = { "Cache-Control": "no-store", "Referrer-Policy": "same-origin" };
   try {
     if (req.method === "POST") {
       // Basic-auth credentials ride along on cross-site form posts; only accept our own page.
+      // The page's Referrer-Policy must stay same-origin: under no-referrer browsers send
+      // "Origin: null" even for our own form, which can't be told apart from a hostile page.
       const origin = req.headers.origin;
-      if (origin && new URL(origin).host !== req.headers.host) throw new Error("cross-origin POST");
+      if (origin && (origin === "null" || new URL(origin).host !== req.headers.host)) throw new Error("cross-origin POST");
       const action = new URL(req.url, "http://x").searchParams.get("action");
       if (action !== "reset" && action !== "mobile") throw new Error(`unknown action ${action}`);
       await restart(action);

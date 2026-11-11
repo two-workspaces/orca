@@ -2,10 +2,10 @@ FROM ubuntu:24.04
 
 # Bump here. Orca: version + sha256 of orca-linux.AppImage (sha256sum the release asset).
 # upgrade: github stablyai/orca
-ARG ORCA_VERSION=1.4.253
-ARG ORCA_SHA256=fce9baedb617c03dde941c6a4408d5bab92d17d2bed1def4015ddbd8fa74efdc
+ARG ORCA_VERSION=1.4.256
+ARG ORCA_SHA256=5453149acd73ad044ad2a3e24226c3467cdc13f317b6ef4778aeb3e14f61a3dd
 # upgrade: npm @anthropic-ai/claude-code
-ARG CLAUDE_CODE_VERSION=2.1.319
+ARG CLAUDE_CODE_VERSION=2.1.322
 # upgrade: npm @openai/codex
 ARG CODEX_VERSION=0.167.0
 # (gh api repos/anomalyco/opencode/releases/tags/vX.Y.Z -q '.assets[]|select(.name=="opencode-linux-x64.tar.gz").digest')
